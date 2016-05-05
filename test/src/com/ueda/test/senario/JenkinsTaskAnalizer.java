@@ -78,7 +78,36 @@ public class JenkinsTaskAnalizer {
 			System.exit(1);
 		}
 		// 比較処理
-		// FIXME
+		// FIXME 比較処理
+		List<OpenTasksXMLBean> targetList = parameter.get(targetBuildNum);
+		List<OpenTasksXMLBean> baseList = parameter.get(baseBuildNum);
+		List<Long> baseContextHashCodeList = getContextHashCodeList(baseList); 
+		int count = 0;
+		for (OpenTasksXMLBean targetBean : targetList) {
+			long contextHashCode = targetBean.getContextHashCode();
+			if (baseContextHashCodeList.contains(contextHashCode)) {
+				// 当時から存在したためOK
+			} else {
+				count++;
+			}
+				
+//			for (OpenTasksXMLBean baseBean : baseList) {
+//				if (contextHashCode == baseBean.getContextHashCode()) {
+//					// 当時から存在したため、
+//				}
+//			}
+		}
+		System.out.println("今バージョンから" + count + "個のタスクが増えています。解決済みタスクはクローズしてください。" +
+				"未解決タスクは解決するか、チケット管理してください。");
+	}
+
+	private List<Long> getContextHashCodeList(List<OpenTasksXMLBean> openTasksXMLBeanList) {
+		List<Long> list = new ArrayList<>();
+		for (OpenTasksXMLBean bean : openTasksXMLBeanList) {
+			long contextHashCode = bean.getContextHashCode();
+			list.add(contextHashCode);
+		}
+		return list;
 	}
 
 	private int getTargetBuildNum(String[] arguments,
@@ -93,6 +122,8 @@ public class JenkinsTaskAnalizer {
 			} catch (NumberFormatException nfe) {
 				targetBuildNum = getMaxBuildNum(parameter);
 			}
+		} else {
+			targetBuildNum = getMaxBuildNum(parameter);
 		}
 		return targetBuildNum;
 	}
@@ -120,6 +151,8 @@ public class JenkinsTaskAnalizer {
 			} catch (NumberFormatException nfe) {
 				baseBuildNum = getMinBuildNum(parameter);
 			}
+		} else {
+			baseBuildNum = getMinBuildNum(parameter);
 		}
 		return baseBuildNum;
 	}
