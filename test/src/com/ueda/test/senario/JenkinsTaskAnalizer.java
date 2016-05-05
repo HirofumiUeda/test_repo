@@ -1,6 +1,9 @@
 package com.ueda.test.senario;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,22 +86,49 @@ public class JenkinsTaskAnalizer {
 		List<OpenTasksXMLBean> baseList = parameter.get(baseBuildNum);
 		List<Long> baseContextHashCodeList = getContextHashCodeList(baseList); 
 		int count = 0;
+		List<OpenTasksXMLBean> taskList = new ArrayList<>();
 		for (OpenTasksXMLBean targetBean : targetList) {
 			long contextHashCode = targetBean.getContextHashCode();
 			if (baseContextHashCodeList.contains(contextHashCode)) {
 				// 当時から存在したためOK
 			} else {
+				taskList.add(targetBean);
 				count++;
 			}
-				
-//			for (OpenTasksXMLBean baseBean : baseList) {
-//				if (contextHashCode == baseBean.getContextHashCode()) {
-//					// 当時から存在したため、
-//				}
-//			}
 		}
 		System.out.println("今バージョンから" + count + "個のタスクが増えています。解決済みタスクはクローズしてください。" +
 				"未解決タスクは解決するか、チケット管理してください。");
+		for (OpenTasksXMLBean bean : taskList) {
+			File file = new File(bean.getFileName());
+			if (!file.exists()) {
+				System.out.println(bean.getFileName() + "は、みつかりませんでした。" + bean.getPrimaryLineNumber() + "行目あたりにタスクを残していないか確認してください。");
+			} else {
+				printTaskContext(file, bean.getPrimaryLineNumber());
+			}
+		}
+	}
+
+	private void printTaskContext(File file, int primaryLineNumber) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String str = br.readLine();
+			int line = 1;
+			while (str != null) {
+				if (line == primaryLineNumber) {
+					System.out.print(file.getName() + "の" + primaryLineNumber + "行目あたりにタスク:「");
+					System.out.print(str);
+					System.out.println("」が残っています。");
+					
+				}
+				str = br.readLine();
+				line++;
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			System.err.println(e);
+		} catch (IOException e) {
+			System.err.println(e);
+		}
 	}
 
 	private List<Long> getContextHashCodeList(List<OpenTasksXMLBean> openTasksXMLBeanList) {
