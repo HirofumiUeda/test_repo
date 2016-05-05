@@ -69,8 +69,72 @@ public class JenkinsTaskAnalizer {
 	}
 
 	public void execute(Map<Integer, List<OpenTasksXMLBean>> parameter) {
-		// TODO Auto-generated method stub
-		
+		int baseBuildNum = getBaseBuildNum(arguments, parameter);
+		int targetBuildNum = getTargetBuildNum(arguments, parameter);
+		if (baseBuildNum == Integer.MAX_VALUE
+				|| targetBuildNum == Integer.MIN_VALUE
+				|| baseBuildNum >= targetBuildNum) {
+			// I—¹
+			System.exit(1);
+		}
+		// ”äŠrˆ—
+		// FIXME
 	}
 
+	private int getTargetBuildNum(String[] arguments,
+			Map<Integer, List<OpenTasksXMLBean>> parameter) {
+		int targetBuildNum = Integer.MIN_VALUE;
+		if (arguments != null && arguments.length > 1) {
+			try {
+				targetBuildNum = Integer.parseInt(arguments[1]);
+				if (!parameter.containsKey(targetBuildNum)) {
+					targetBuildNum = getMaxBuildNum(parameter);
+				}
+			} catch (NumberFormatException nfe) {
+				targetBuildNum = getMaxBuildNum(parameter);
+			}
+		}
+		return targetBuildNum;
+	}
+
+	private int getMaxBuildNum(Map<Integer, List<OpenTasksXMLBean>> parameter) {
+		int max = Integer.MIN_VALUE;
+		for (Integer buildNum : parameter.keySet()) {
+			if (max < buildNum
+					&& parameter.get(buildNum) != null
+					&& parameter.get(buildNum).size() > 0) {
+				max = buildNum;
+			}
+		}
+		return max;
+	}
+
+	private int getBaseBuildNum(String[] arguments, Map<Integer, List<OpenTasksXMLBean>> parameter) {
+		int baseBuildNum = Integer.MAX_VALUE;
+		if (arguments != null && arguments.length > 0) {
+			try {
+				baseBuildNum = Integer.parseInt(arguments[0]);
+				if (!parameter.containsKey(baseBuildNum)) {
+					baseBuildNum = getMinBuildNum(parameter);
+				}
+			} catch (NumberFormatException nfe) {
+				baseBuildNum = getMinBuildNum(parameter);
+			}
+		}
+		return baseBuildNum;
+	}
+
+	private int getMinBuildNum(Map<Integer, List<OpenTasksXMLBean>> parameter) {
+		int min = Integer.MAX_VALUE;
+		for (Integer buildNum : parameter.keySet()) {
+			if (min > buildNum
+					&& parameter.get(buildNum) != null
+					&& parameter.get(buildNum).size() > 0) {
+				min = buildNum;
+			}
+		}
+		return min;
+	}
+
+	
 }
