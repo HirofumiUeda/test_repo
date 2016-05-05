@@ -27,7 +27,7 @@ public class XmlReader {
 		Document document = documentBuilder.parse(file);
 		Element root = document.getDocumentElement();
 		//ルート要素のノード名を取得する
-		System.out.println("ノード名：" +root.getNodeName());
+//		System.out.println("ノード名：" +root.getNodeName());
 		//ルート要素の子ノードを取得する
 		NodeList rootChildren = root.getChildNodes();
 		for(int i=0; i < rootChildren.getLength(); i++) {
