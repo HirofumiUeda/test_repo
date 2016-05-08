@@ -88,7 +88,6 @@ public class JenkinsTaskAnalizer {
 			System.exit(1);
 		}
 		// ”äŠrˆ—
-		// FIXME ”äŠrˆ—
 		List<OpenTasksXMLBean> targetList = parameter.get(targetBuildNum);
 		List<OpenTasksXMLBean> baseList = parameter.get(baseBuildNum);
 		List<Long> baseContextHashCodeList = getContextHashCodeList(baseList); 
