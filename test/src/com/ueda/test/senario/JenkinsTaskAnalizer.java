@@ -15,21 +15,27 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.ueda.test.Constants;
+import com.ueda.test.bean.JenkinsEnvironmentInfoBean;
 import com.ueda.test.bean.OpenTasksXMLBean;
 import com.ueda.test.reader.XmlReader;
 
 public class JenkinsTaskAnalizer {
 
-	private String[] arguments;
-	public JenkinsTaskAnalizer(String[] args) {
-		this.arguments = args;
+	private JenkinsEnvironmentInfoBean jenkinsEnvironmentInfoBean;
+	public JenkinsTaskAnalizer(JenkinsEnvironmentInfoBean jenkinsEnvironmentInfoBean) {
+		this.jenkinsEnvironmentInfoBean = jenkinsEnvironmentInfoBean;
 	}
 
-	public Map<Integer, List<OpenTasksXMLBean>> createParam() throws SAXException, IOException, ParserConfigurationException {
-		// TODO Auto-generated method stub
+	public Map<Integer, List<OpenTasksXMLBean>> createParam()
+			throws SAXException, IOException, ParserConfigurationException {
 		Map<Integer, List<OpenTasksXMLBean>> map = new HashMap<>();
-		String repoPath = Constants.JENKINST_REPO_HOME + Constants.REPO + Constants.BUILDS;
+		String repoPath = jenkinsEnvironmentInfoBean.getJenkinsRepoHome()
+				+ File.separator + jenkinsEnvironmentInfoBean.getRepoName() + Constants.BUILDS;
 		File dir = new File(repoPath);
+		if (!dir.exists()) {
+			System.err.println("Jenkinsのホームが正しくありません。もしくは、存在しないリポジトリが指定されています。指定を見直してください。");
+			System.exit(1);
+		}
 		File[] filelist = dir.listFiles();
 		for (File file : filelist) {
 			if (file.isDirectory()) {
@@ -46,7 +52,7 @@ public class JenkinsTaskAnalizer {
 				}
 			}
 		}
-		System.out.println(map);
+//		System.out.println(map);
 		return map;
 	}
 
@@ -72,12 +78,13 @@ public class JenkinsTaskAnalizer {
 	}
 
 	public void execute(Map<Integer, List<OpenTasksXMLBean>> parameter) {
-		int baseBuildNum = getBaseBuildNum(arguments, parameter);
-		int targetBuildNum = getTargetBuildNum(arguments, parameter);
+		int baseBuildNum = getBaseBuildNum(jenkinsEnvironmentInfoBean.getBaseBuildNum(), parameter);
+		int targetBuildNum = getTargetBuildNum(jenkinsEnvironmentInfoBean.getTargetBuildNum(), parameter);
 		if (baseBuildNum == Integer.MAX_VALUE
 				|| targetBuildNum == Integer.MIN_VALUE
 				|| baseBuildNum >= targetBuildNum) {
 			// 終了
+			System.err.println("Jenkinsによるビルド回数が足りていないか、指定されたビルド番号が不正です。");
 			System.exit(1);
 		}
 		// 比較処理
@@ -140,12 +147,12 @@ public class JenkinsTaskAnalizer {
 		return list;
 	}
 
-	private int getTargetBuildNum(String[] arguments,
+	private int getTargetBuildNum(int propValue,
 			Map<Integer, List<OpenTasksXMLBean>> parameter) {
 		int targetBuildNum = Integer.MIN_VALUE;
-		if (arguments != null && arguments.length > 1) {
+		if (propValue != -1) {
 			try {
-				targetBuildNum = Integer.parseInt(arguments[1]);
+				targetBuildNum = propValue;
 				if (!parameter.containsKey(targetBuildNum)) {
 					targetBuildNum = getMaxBuildNum(parameter);
 				}
@@ -170,11 +177,11 @@ public class JenkinsTaskAnalizer {
 		return max;
 	}
 
-	private int getBaseBuildNum(String[] arguments, Map<Integer, List<OpenTasksXMLBean>> parameter) {
+	private int getBaseBuildNum(int propValue, Map<Integer, List<OpenTasksXMLBean>> parameter) {
 		int baseBuildNum = Integer.MAX_VALUE;
-		if (arguments != null && arguments.length > 0) {
+		if (propValue != -1) {
 			try {
-				baseBuildNum = Integer.parseInt(arguments[0]);
+				baseBuildNum = propValue;
 				if (!parameter.containsKey(baseBuildNum)) {
 					baseBuildNum = getMinBuildNum(parameter);
 				}
