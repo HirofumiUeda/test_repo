@@ -106,20 +106,24 @@ public class JenkinsTaskAnalizer {
 				"未解決タスクは解決するか、チケット管理してください。");
 		for (OpenTasksXMLBean bean : taskList) {
 			File file = new File(bean.getFileName());
-			if (!file.exists()) {
+			boolean fileExists = !file.exists();
+			if (fileExists) {
 				// TODO 動作確認
 				boolean isNotExist = true;
+				String fileNameForLog = bean.getFileName();
 				if (jenkinsEnvironmentInfoBean.getJenkinsWorkspace() != null) {
 					String fileName = getFileNameFromFilePath(bean.getFileName());
-					String pathName = jenkinsEnvironmentInfoBean.getJenkinsWorkspace() + File.separator + fileName;
+					String repoPathName = getPathName(bean.getPathName());
+					String pathName = jenkinsEnvironmentInfoBean.getJenkinsWorkspace() + File.separator + repoPathName + File.separator + fileName;
 					File workspaceFile = new File(pathName);
 					if (workspaceFile.exists()) {
 						isNotExist = false;
 						printTaskContext(workspaceFile, bean.getPrimaryLineNumber());
 					}
+					fileNameForLog = pathName;
 				}
 				if (isNotExist) {
-					System.out.println(bean.getFileName() + "は、みつかりませんでした。" + bean.getPrimaryLineNumber() + "行目あたりにタスクを残していないか確認してください。");
+					System.out.println(fileNameForLog + "は、みつかりませんでした。" + bean.getPrimaryLineNumber() + "行目あたりにタスクを残していないか確認してください。");
 				}
 			} else {
 				printTaskContext(file, bean.getPrimaryLineNumber());
@@ -127,8 +131,17 @@ public class JenkinsTaskAnalizer {
 		}
 	}
 
+	private String getPathName(String pathName) {
+		String path = pathName.replace("/", File.separator);
+		return path;
+	}
+
 	private String getFileNameFromFilePath(String filePath) {
-		int index = filePath.lastIndexOf(File.separator);
+		String separator = "/";
+		int index = filePath.lastIndexOf(separator);
+		if (index == -1) {
+			index = filePath.lastIndexOf(File.separator);
+		}
 		String fileName = filePath.substring(index + 1);
 		return fileName;
 	}

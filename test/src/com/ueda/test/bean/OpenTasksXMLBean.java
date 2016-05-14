@@ -10,6 +10,7 @@ public class OpenTasksXMLBean {
 	private String packageName;
 	private String type;
 	private long contextHashCode;
+	private String pathName;
 
 	public int getBuildNum() {
 		return buildNum;
@@ -75,12 +76,22 @@ public class OpenTasksXMLBean {
 		this.contextHashCode = contextHashCode;
 	}
 
+	public String getPathName() {
+		return pathName;
+	}
+
+	public void setPathName(String pathName) {
+		this.pathName = pathName;
+	}
+
+	@Override
 	public String toString() {
 		return "OpenTasksXMLBean [buildNum=" + buildNum + ", priority="
 				+ priority + ", lineRangesBean=" + lineRangesBean
 				+ ", primaryLineNumber=" + primaryLineNumber + ", fileName="
 				+ fileName + ", packageName=" + packageName + ", type=" + type
-				+ ", contextHashCode=" + contextHashCode + "]";
+				+ ", contextHashCode=" + contextHashCode + ", pathName="
+				+ pathName + "]";
 	}
 
 }

@@ -54,6 +54,8 @@ public class XmlReader {
 								opeanTasksXMLBean.setType(taskChildNode.getTextContent());
 							} else if (taskChildNode.getNodeName().equals("contextHashCode")) {
 								opeanTasksXMLBean.setContextHashCode(Long.parseLong(taskChildNode.getTextContent()));
+							} else if (taskChildNode.getNodeName().equals("pathName")) {
+								opeanTasksXMLBean.setPathName(taskChildNode.getTextContent());
 							}
 						}
 					}
