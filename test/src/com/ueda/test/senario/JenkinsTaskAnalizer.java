@@ -108,7 +108,6 @@ public class JenkinsTaskAnalizer {
 			File file = new File(bean.getFileName());
 			boolean fileExists = !file.exists();
 			if (fileExists) {
-				// TODO 動作確認
 				boolean isNotExist = true;
 				String fileNameForLog = bean.getFileName();
 				if (jenkinsEnvironmentInfoBean.getJenkinsWorkspace() != null) {
@@ -131,11 +130,13 @@ public class JenkinsTaskAnalizer {
 		}
 	}
 
+	// TODO 要注意
 	private String getPathName(String pathName) {
 		String path = pathName.replace("/", File.separator);
 		return path;
 	}
 
+	// TODO 要注意
 	private String getFileNameFromFilePath(String filePath) {
 		String separator = "/";
 		int index = filePath.lastIndexOf(separator);
