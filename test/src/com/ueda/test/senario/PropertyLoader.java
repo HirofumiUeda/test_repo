@@ -56,6 +56,8 @@ public class PropertyLoader {
 		bean.setBaseBuildNum(baseBuildNum);
 		int targetBuildNum = getPropertyValueForInt(prop, Constants.TARGET_BUILD_NUM);
 		bean.setTargetBuildNum(targetBuildNum);
+		String jenkinsWorkspace = prop.getProperty(Constants.JENKINS_WORKSPACE);
+		bean.setJenkinsWorkspace(jenkinsWorkspace);
 		return bean;
 	}
 

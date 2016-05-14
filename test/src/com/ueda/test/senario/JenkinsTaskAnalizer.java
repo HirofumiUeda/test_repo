@@ -107,11 +107,30 @@ public class JenkinsTaskAnalizer {
 		for (OpenTasksXMLBean bean : taskList) {
 			File file = new File(bean.getFileName());
 			if (!file.exists()) {
-				System.out.println(bean.getFileName() + "は、みつかりませんでした。" + bean.getPrimaryLineNumber() + "行目あたりにタスクを残していないか確認してください。");
+				// TODO 動作確認
+				boolean isNotExist = true;
+				if (jenkinsEnvironmentInfoBean.getJenkinsWorkspace() != null) {
+					String fileName = getFileNameFromFilePath(bean.getFileName());
+					String pathName = jenkinsEnvironmentInfoBean.getJenkinsWorkspace() + File.separator + fileName;
+					File workspaceFile = new File(pathName);
+					if (workspaceFile.exists()) {
+						isNotExist = false;
+						printTaskContext(workspaceFile, bean.getPrimaryLineNumber());
+					}
+				}
+				if (isNotExist) {
+					System.out.println(bean.getFileName() + "は、みつかりませんでした。" + bean.getPrimaryLineNumber() + "行目あたりにタスクを残していないか確認してください。");
+				}
 			} else {
 				printTaskContext(file, bean.getPrimaryLineNumber());
 			}
 		}
+	}
+
+	private String getFileNameFromFilePath(String filePath) {
+		int index = filePath.lastIndexOf(File.separator);
+		String fileName = filePath.substring(index + 1);
+		return fileName;
 	}
 
 	private void printTaskContext(File file, int primaryLineNumber) {

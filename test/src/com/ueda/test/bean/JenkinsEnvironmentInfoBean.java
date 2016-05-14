@@ -7,6 +7,7 @@ public class JenkinsEnvironmentInfoBean {
 	private String repoName;
 	private int baseBuildNum;
 	private int targetBuildNum;
+	private String jenkinsWorkspace;
 	
 	public String getJenkinsRepoHome() {
 		return jenkinsRepoHome;
@@ -32,6 +33,11 @@ public class JenkinsEnvironmentInfoBean {
 	public void setTargetBuildNum(int targetBuildNum) {
 		this.targetBuildNum = targetBuildNum;
 	}
-	
+	public void setJenkinsWorkspace(String jenkinsWorkspace) {
+		this.jenkinsWorkspace = jenkinsWorkspace;
+	}
+	public String getJenkinsWorkspace() {
+		return this.jenkinsWorkspace;
+	}
 	
 }

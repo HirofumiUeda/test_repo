@@ -15,5 +15,6 @@ public class Constants {
 	final public static String REPOSITORY_NAME ="repository.name";
 	final public static String BASE_BUILD_NUM = "base.build.num";
 	final public static String TARGET_BUILD_NUM ="target.build.num";
+	final public static String JENKINS_WORKSPACE = "jenkins.workspace";
 
 }
