@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -130,13 +133,11 @@ public class JenkinsTaskAnalizer {
 		}
 	}
 
-	// TODO óvíçà”
 	private String getPathName(String pathName) {
 		String path = pathName.replace("/", File.separator);
 		return path;
 	}
 
-	// TODO óvíçà”
 	private String getFileNameFromFilePath(String filePath) {
 		String separator = "/";
 		int index = filePath.lastIndexOf(separator);
@@ -198,15 +199,16 @@ public class JenkinsTaskAnalizer {
 	}
 
 	private int getMaxBuildNum(Map<Integer, List<OpenTasksXMLBean>> parameter) {
-		int max = Integer.MIN_VALUE;
-		for (Integer buildNum : parameter.keySet()) {
-			if (max < buildNum
-					&& parameter.get(buildNum) != null
-					&& parameter.get(buildNum).size() > 0) {
-				max = buildNum;
-			}
-		}
-		return max;
+		Stream<Integer> stream = parameter.keySet().stream();
+		Stream<Integer> notNullStream = 
+				stream.filter(new Predicate<Integer>() {
+					@Override
+					public boolean test(Integer t) {
+						return parameter.get(t) != null && parameter.get(t).size() > 0;
+					}
+				});
+		Optional<Integer> max = notNullStream.max((a, b) -> a.compareTo(b));
+		return max.orElse(Integer.MIN_VALUE);
 	}
 
 	private int getBaseBuildNum(int propValue, Map<Integer, List<OpenTasksXMLBean>> parameter) {
@@ -226,16 +228,17 @@ public class JenkinsTaskAnalizer {
 		return baseBuildNum;
 	}
 
-	private int getMinBuildNum(Map<Integer, List<OpenTasksXMLBean>> parameter) {
-		int min = Integer.MAX_VALUE;
-		for (Integer buildNum : parameter.keySet()) {
-			if (min > buildNum
-					&& parameter.get(buildNum) != null
-					&& parameter.get(buildNum).size() > 0) {
-				min = buildNum;
-			}
-		}
-		return min;
+	private int getMinBuildNum(final Map<Integer, List<OpenTasksXMLBean>> parameter) {
+		Stream<Integer> stream = parameter.keySet().stream();
+		Stream<Integer> notNullStream = 
+				stream.filter(new Predicate<Integer>() {
+					@Override
+					public boolean test(Integer t) {
+						return parameter.get(t) != null && parameter.get(t).size() > 0;
+					}
+				});
+		Optional<Integer> min = notNullStream.min((a, b) -> a.compareTo(b));
+		return min.orElse(Integer.MAX_VALUE);
 	}
 
 	
