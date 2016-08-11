@@ -5,12 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,14 +44,8 @@ public class JenkinsTaskAnalizer {
 			if (file.isDirectory()) {
 				if (isTargetDirectory(file)) {
 					int buildNum = Integer.parseInt(file.getName());
-					List<OpenTasksXMLBean> list = getOpenTasksXMLBeanList(file);
-					for (OpenTasksXMLBean bean : list) {
-						bean.setBuildNum(buildNum);
-						if (!map.containsKey(buildNum)) {
-							map.put(buildNum, new ArrayList<OpenTasksXMLBean>());
-						}
-						map.get(buildNum).add(bean);
-					}
+					List<OpenTasksXMLBean> list = getOpenTasksXMLBeanList(buildNum, file);
+					map.put(buildNum, list);
 				}
 			}
 		}
@@ -59,10 +53,10 @@ public class JenkinsTaskAnalizer {
 		return map;
 	}
 
-	private List<OpenTasksXMLBean> getOpenTasksXMLBeanList(File file) throws SAXException, IOException, ParserConfigurationException {
+	private List<OpenTasksXMLBean> getOpenTasksXMLBeanList(int buildNum, File file) throws SAXException, IOException, ParserConfigurationException {
 		String filePath = file.getAbsolutePath() + File.separator + Constants.OPEN_TASKS_XML_FILE;
 		XmlReader reader = new XmlReader();
-		return reader.domReadForJenkinsAnalyzer(filePath);
+		return reader.domReadForJenkinsAnalyzer(buildNum, filePath);
 	}
 
 	private boolean isTargetDirectory(File file) {
@@ -94,17 +88,15 @@ public class JenkinsTaskAnalizer {
 		List<OpenTasksXMLBean> targetList = parameter.get(targetBuildNum);
 		List<OpenTasksXMLBean> baseList = parameter.get(baseBuildNum);
 		List<Long> baseContextHashCodeList = getContextHashCodeList(baseList); 
-		int count = 0;
-		List<OpenTasksXMLBean> taskList = new ArrayList<>();
-		for (OpenTasksXMLBean targetBean : targetList) {
-			long contextHashCode = targetBean.getContextHashCode();
-			if (baseContextHashCodeList.contains(contextHashCode)) {
-				// 当時から存在したためOK
-			} else {
-				taskList.add(targetBean);
-				count++;
-			}
-		}
+		List<OpenTasksXMLBean> taskList = targetList.stream()
+					.filter(new Predicate<OpenTasksXMLBean>() {
+						@Override
+						public boolean test(final OpenTasksXMLBean bean) {
+							return !baseContextHashCodeList.contains(bean.getContextHashCode());
+						}
+				    })
+					.collect(Collectors.toList());
+		int count = taskList != null ? taskList.size() : 0;
 		System.out.println("今バージョンから" + count + "個のタスクが増えています。解決済みタスクはクローズしてください。" +
 				"未解決タスクは解決するか、チケット管理してください。");
 		for (OpenTasksXMLBean bean : taskList) {
@@ -172,11 +164,9 @@ public class JenkinsTaskAnalizer {
 	}
 
 	private List<Long> getContextHashCodeList(List<OpenTasksXMLBean> openTasksXMLBeanList) {
-		List<Long> list = new ArrayList<>();
-		for (OpenTasksXMLBean bean : openTasksXMLBeanList) {
-			long contextHashCode = bean.getContextHashCode();
-			list.add(contextHashCode);
-		}
+		List<Long> list = openTasksXMLBeanList.stream()
+							.map(OpenTasksXMLBean::getContextHashCode)
+							.collect(Collectors.toList());
 		return list;
 	}
 
