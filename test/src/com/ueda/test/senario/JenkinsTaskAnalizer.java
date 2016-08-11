@@ -84,6 +84,10 @@ public class JenkinsTaskAnalizer {
 			System.err.println("Jenkinsによるビルド回数が足りていないか、指定されたビルド番号が不正です。");
 			System.exit(1);
 		}
+		// TODO[PDR]確認して、今回のtargetBuildが指定されていないにも関わらず、
+		// 現在のビルドより小さい値なら、今バージョンで未解決タスクは増えていないと思われる。
+		System.out.println("base : " + baseBuildNum + ", target : " + targetBuildNum);
+		System.out.println("TODO[PDR]確認して、今回のtargetBuildが指定されていないにも関わらず、現在のビルドより小さい値なら、今バージョンで未解決タスクは増えていないと思われる。");
 		// 比較処理
 		List<OpenTasksXMLBean> targetList = parameter.get(targetBuildNum);
 		List<OpenTasksXMLBean> baseList = parameter.get(baseBuildNum);
